@@ -44,7 +44,7 @@ Function Export-TaskbarPinnedAppsLayout{
         }
     }
 
-    If (-not (Test-Path $Path -PathType Leaf)){
+    If (-not (Test-Path (Split-Path $Path -Parent) -PathType Container)){
         Write-Error ([System.IO.FileNotFoundException]::new("宛先ディレクトリが見つかりませんでした: [$Path]")) -ErrorAction Stop
     }
 
@@ -65,7 +65,7 @@ Function Export-TaskbarPinnedAppsLayout{
 
     $TemporaryItems = New-Object "System.Collections.Generic.List[Item]"
     Write-Progress -Activity "タスクバーにピン留されたプログラムを調べています" -Status "shell:User Pinned\Taskbar" -PercentComplete 10
-    ((New-Object -Com Shell.Application).NameSpace("shell:User Pinned\Taskbar").Items() | Where-Object IsLink) | Select-Object Name, @{Name="DesktopApplicationID";Expression={((New-Object -Com Shell.Application).NameSpace("shell:AppsFolder").Items() | Where-Object Name -eq $_.Name).Path}}, Path, @{Name="IsPinnedOnTaskbar";Expression={$True}}, @{Name="DesktopApp";Expression={"DesktopApplicationLinkPath"}} | ForEach-Object {$TemporaryItems.Add((New-Object Item -Property @{Name = $_.Name; Path = $_.Path; DesktopApplicationID = $_.DesktopApplicationID}))}
+    ((New-Object -Com Shell.Application).NameSpace("shell:User Pinned\Taskbar").Items() | Where-Object IsLink) | Select-Object Name, @{Name="DesktopApplicationID";Expression={@((New-Object -Com Shell.Application).NameSpace("shell:AppsFolder").Items() | Where-Object Name -eq $_.Name)[0].Path}}, Path, @{Name="IsPinnedOnTaskbar";Expression={$True}}, @{Name="DesktopApp";Expression={"DesktopApplicationLinkPath"}} | ForEach-Object {$TemporaryItems.Add((New-Object Item -Property @{Name = $_.Name; Path = $_.Path; DesktopApplicationID = $_.DesktopApplicationID}))}
     Write-Progress -Activity "タスクバーにピン留されたプログラムを調べています" -Status "shell:User Pinned\Taskbar" -PercentComplete 30
     ((New-Object -Com Shell.Application).NameSpace("shell:AppsFolder").Items()) | Select-Object Name, Path, @{Name="IsPinnedOnTaskbar";Expression={$UnpinFromTaskbarText -in (($_.Verbs() | Select-Object Name).Name)}}, @{Name="DesktopApp";Expression={"DesktopApplicationID"}} | Where-Object "IsPinnedOnTaskbar" | ForEach-Object {$TemporaryItems.Add((New-Object Item -Property @{Name = $_.Name; DesktopApplicationID = $_.Path}))}
     Write-Progress -Activity "タスクバーにピン留されたプログラムを調べています" -Completed
