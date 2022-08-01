@@ -20,9 +20,9 @@
         Write-Host "`n" -NoNewline
         Write-Host "Esc" -NoNewline -BackgroundColor Gray -ForegroundColor Black
         Write-Host " 終了  " -NoNewline -ForegroundColor Gray
-        Write-Host "↑・↓" -NoNewline -BackgroundColor Gray -ForegroundColor Black
+        Write-Host "↑・↓・Home・End" -NoNewline -BackgroundColor Gray -ForegroundColor Black
         Write-Host " 項目の選択  " -NoNewline -ForegroundColor Gray
-        Write-Host "PgUp・PgDn" -NoNewline -BackgroundColor Gray -ForegroundColor Black
+        Write-Host "PgUp・PgDn・Ctrl+PgUp・Ctrl+PgDn" -NoNewline -BackgroundColor Gray -ForegroundColor Black
         Write-Host " 選択項目の移動  " -NoNewline -ForegroundColor Gray
         Write-Host "Del" -NoNewline -BackgroundColor Gray -ForegroundColor Black
         Write-Host " 選択項目の削除  " -NoNewline -ForegroundColor Gray
@@ -41,11 +41,13 @@
     While ($True){
         Write-Menu -Items $Items -Length $Length -Title $Title
         $PressedKey = [System.Console]::ReadKey($True)
+        # Exit
         If ($PressedKey.Key -eq [System.ConsoleKey]::Escape -and $PressedKey.Modifiers -eq 0){
             [System.Console]::CursorVisible = $True
             Clear-Host
             Break
         }
+        # Select
         ElseIf ($PressedKey.Key -eq [System.ConsoleKey]::Home -and $PressedKey.Modifiers -eq 0){
             $Index = $Items.IndexOf(($Items | Where-Object IsSelected))
             $Items[$Index].IsSelected = $False
@@ -76,6 +78,7 @@
                 $Items[$Index + 1].IsSelected = $True
             }
         }
+        # Move
         ElseIf ($PressedKey.Key -eq [System.ConsoleKey]::PageUp -and $PressedKey.Modifiers -eq 0){
             $Item = ($Items | Where-Object IsSelected)
             $Index = $Items.IndexOf($Item)
@@ -92,6 +95,23 @@
                 $Items.Insert($Index + 1, $Item)
             }
         }
+        ElseIf ($PressedKey.Key -eq [System.ConsoleKey]::PageUp -and $PressedKey.Modifiers -eq "Control"){
+            $Item = ($Items | Where-Object IsSelected)
+            $Index = $Items.IndexOf($Item)
+            If ($Index -ne 0){
+                $Items.RemoveAt($Index)
+                $Items.Insert(0, $Item)
+            }
+        }
+        ElseIf ($PressedKey.Key -eq [System.ConsoleKey]::PageDown -and $PressedKey.Modifiers -eq "Control"){
+            $Item = ($Items | Where-Object IsSelected)
+            $Index = $Items.IndexOf($Item)
+            If ($Index -ne ($Items.Count - 1)){
+                $Items.RemoveAt($Index)
+                $Items.Insert($Items.Count, $Item)
+            }
+        }
+        # Remove
         ElseIf ($PressedKey.Key -eq [System.ConsoleKey]::Delete -and $PressedKey.Modifiers -eq 0){
             $Index = $Items.IndexOf(($Items | Where-Object IsSelected))
             $Items.RemoveAt($Index)
@@ -104,6 +124,7 @@
                 $Items[0].IsSelected = $True
             }
         }
+        # Screen refresh
         ElseIf ($PressedKey.Key -eq [System.ConsoleKey]::F5 -and $PressedKey.Modifiers -eq 0){
             Clear-Host
             [System.Console]::CursorVisible = $False

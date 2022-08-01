@@ -16,14 +16,32 @@ using namespace System.Xml.Linq
  .Parameter EditSortOrder
    Edit the sort order with the simple editor
 
+ .Parameter SortOrder
+   Edit default sort order list
+
+   [default list]
+   - Microsoft Edge
+   - File Explorer
+   - Microsoft Store
+   - Microsoft Word
+   - Microsoft Excel
+   - Microsoft PowerPoint
+   - Microsoft Access
+   - Microsoft Publisher
+   - Microsoft Outlook
+
  .Example
    Export-TaskbarPinnedAppsLayout -Path C:\Windows\OEM\TaskbarLayoutModification.xml -EditSortOrder
+
+ .Example
+   Export-TaskbarPinnedAppsLayout -Path C:\Windows\OEM\TaskbarLayoutModification.xml -SortOrder @("MSEdge", "Microsoft.MicrosoftEdge_8wekyb3d8bbwe!MicrosoftEdge", "Microsoft.WindowsStore_8wekyb3d8bbwe!App", "Microsoft.Windows.Explorer", "Microsoft.Office.WINWORD.EXE.15", "Microsoft.Office.EXCEL.EXE.15", "Microsoft.Office.POWERPNT.EXE.15", "Microsoft.Office.MSACCESS.EXE.15", "Microsoft.Office.MSPUB.EXE.15", "Microsoft.Office.OUTLOOK.EXE.15", "Microsoft.VisualStudioCode")
 
 #>
 Function Export-TaskbarPinnedAppsLayout{
     Param(
         [Parameter(Mandatory)][String]$Path="",
-        [Switch]$EditSortOrder = $False
+        [Switch]$EditSortOrder = $False,
+        [String[]]$SortOrder = @("MSEdge", "Microsoft.MicrosoftEdge_8wekyb3d8bbwe!MicrosoftEdge", "Microsoft.WindowsStore_8wekyb3d8bbwe!App", "Microsoft.Windows.Explorer", "Microsoft.Office.WINWORD.EXE.15", "Microsoft.Office.EXCEL.EXE.15", "Microsoft.Office.POWERPNT.EXE.15", "Microsoft.Office.MSACCESS.EXE.15", "Microsoft.Office.MSPUB.EXE.15", "Microsoft.Office.OUTLOOK.EXE.15")
     )
     Class Item{
         [String]$Name
@@ -64,17 +82,24 @@ Function Export-TaskbarPinnedAppsLayout{
     }
 
     $TemporaryItems = New-Object "System.Collections.Generic.List[Item]"
-    Write-Progress -Activity "タスクバーにピン留されたプログラムを調べています" -Status "shell:User Pinned\Taskbar" -PercentComplete 10
+    Write-Progress -Activity "タスク バーにピン留めされたプログラムを調べています" -Status "shell:User Pinned\Taskbar" -PercentComplete 10
     ((New-Object -Com Shell.Application).NameSpace("shell:User Pinned\Taskbar").Items() | Where-Object IsLink) | Select-Object Name, @{Name="DesktopApplicationID";Expression={@((New-Object -Com Shell.Application).NameSpace("shell:AppsFolder").Items() | Where-Object Name -eq $_.Name)[0].Path}}, Path, @{Name="IsPinnedOnTaskbar";Expression={$True}}, @{Name="DesktopApp";Expression={"DesktopApplicationLinkPath"}} | ForEach-Object {$TemporaryItems.Add((New-Object Item -Property @{Name = $_.Name; Path = $_.Path; DesktopApplicationID = $_.DesktopApplicationID}))}
-    Write-Progress -Activity "タスクバーにピン留されたプログラムを調べています" -Status "shell:User Pinned\Taskbar" -PercentComplete 30
+    Write-Progress -Activity "タスク バーにピン留めされたプログラムを調べています" -Status "shell:User Pinned\Taskbar" -PercentComplete 30
     ((New-Object -Com Shell.Application).NameSpace("shell:AppsFolder").Items()) | Select-Object Name, Path, @{Name="IsPinnedOnTaskbar";Expression={$UnpinFromTaskbarText -in (($_.Verbs() | Select-Object Name).Name)}}, @{Name="DesktopApp";Expression={"DesktopApplicationID"}} | Where-Object "IsPinnedOnTaskbar" | ForEach-Object {$TemporaryItems.Add((New-Object Item -Property @{Name = $_.Name; DesktopApplicationID = $_.Path}))}
-    Write-Progress -Activity "タスクバーにピン留されたプログラムを調べています" -Completed
+    Write-Progress -Activity "タスク バーにピン留めされたプログラムを調べています" -Completed
 
     $TemporaryItems = $TemporaryItems | Where-Object {-not ([String]::IsNullOrEmpty($_.DesktopApplicationID))} | Sort-Object -Unique DesktopApplicationID
+    If ($TemporaryItems.Count -eq 0){
+        Write-Warning "タスク バーにピン留めされたアプリが見つかりませんでした"
+        Break
+    }
+
+    $TemporaryItems = $TemporaryItems | Sort-Object {$Index = $SortOrder.IndexOf($_.DesktopApplicationID); If ($Index -eq -1){$Index = 2147483647}; Return $Index}
     $Items = New-Object "System.Collections.Generic.List[Item]"
     $TemporaryItems | ForEach-Object {$Items.Add($_)}
 
     If ($EditSortOrder){
+        $TemporaryItems[0].IsSelected = $True
         Show-Menu -Items $Items -Title "項目の並び替え"
     }
 
@@ -85,7 +110,7 @@ Function Export-TaskbarPinnedAppsLayout{
             [XAttribute]::new("{http://www.w3.org/2000/xmlns/}defaultlayout", "http://schemas.microsoft.com/Start/2014/FullDefaultLayout"),
             [XAttribute]::new("{http://www.w3.org/2000/xmlns/}start", "http://schemas.microsoft.com/Start/2014/StartLayout"),
             [XAttribute]::new("{http://www.w3.org/2000/xmlns/}taskbar", "http://schemas.microsoft.com/Start/2014/TaskbarLayout"),
-            [XAttribute]::new("version", "1"),
+            [XAttribute]::new("Version", "1"),
             [XElement]::new("{http://schemas.microsoft.com/Start/2014/LayoutModification}CustomTaskbarLayoutCollection", @(
                 [XElement]::new("{http://schemas.microsoft.com/Start/2014/FullDefaultLayout}TaskbarLayout", @(
                     [XElement]::new("{http://schemas.microsoft.com/Start/2014/TaskbarLayout}TaskbarPinList", @(
