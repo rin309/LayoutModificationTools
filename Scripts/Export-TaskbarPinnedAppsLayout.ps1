@@ -105,15 +105,20 @@ Function Export-TaskbarPinnedAppsLayout{
 
     $Xml = [XDocument]::new(
         [XDeclaration]::new("1.0", "utf-8", "yes"),
-        [XElement]::new("{http://schemas.microsoft.com/Start/2014/LayoutModification}LayoutModificationTemplate", @(
+        [XElement]::new("{http://schemas.microsoft.com/Start/2014/LayoutModification}LayoutModificationTemplate", 
+        @(
             #[XNamespace]"http://schemas.microsoft.com/Start/2014/LayoutModification",
             [XAttribute]::new("{http://www.w3.org/2000/xmlns/}defaultlayout", "http://schemas.microsoft.com/Start/2014/FullDefaultLayout"),
             [XAttribute]::new("{http://www.w3.org/2000/xmlns/}start", "http://schemas.microsoft.com/Start/2014/StartLayout"),
             [XAttribute]::new("{http://www.w3.org/2000/xmlns/}taskbar", "http://schemas.microsoft.com/Start/2014/TaskbarLayout"),
             [XAttribute]::new("Version", "1"),
-            [XElement]::new("{http://schemas.microsoft.com/Start/2014/LayoutModification}CustomTaskbarLayoutCollection", @(
-                [XElement]::new("{http://schemas.microsoft.com/Start/2014/FullDefaultLayout}TaskbarLayout", @(
-                    [XElement]::new("{http://schemas.microsoft.com/Start/2014/TaskbarLayout}TaskbarPinList", @(
+            [XElement]::new("{http://schemas.microsoft.com/Start/2014/LayoutModification}CustomTaskbarLayoutCollection", 
+            [XAttribute]::new("PinListPlacement", "Replace"),
+            @(
+                [XElement]::new("{http://schemas.microsoft.com/Start/2014/FullDefaultLayout}TaskbarLayout", 
+                @(
+                    [XElement]::new("{http://schemas.microsoft.com/Start/2014/TaskbarLayout}TaskbarPinList", 
+                    @(
                         #[XElement]::new("{http://schemas.microsoft.com/Start/2014/TaskbarLayout}DesktopApp", @(
                             #[XAttribute]::new("DesktopApplicationID", "Microsoft.Windows.Explorer")
                         #)),
