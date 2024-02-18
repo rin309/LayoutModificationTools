@@ -52,7 +52,10 @@ Function Export-TaskbarPinnedAppsLayout{
             $Text = " $($This.Name) [$($This.DesktopApplicationID)]"
             Write-Verbose $Text
             $DisplayTextLength = [System.Text.Encoding]::GetEncoding("Shift_JIS").GetByteCount($Text.PadRight($Length))
-            If ($DisplayTextLength -ge $Length){
+            If ($Length -eq 0){
+                $DisplayTextLength = $DisplayTextLength
+            }
+            ElseIf ($DisplayTextLength -ge $Length){
                 $DisplayTextLength = $Length - ($DisplayTextLength - $Length)
             }
             Else{

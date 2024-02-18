@@ -34,7 +34,7 @@
     }
 
     $ItemsCount = $Items.Count
-    $Length = ($Items | Select-Object @{Name="ByteLength";Expression={[System.Text.Encoding]::GetEncoding("Shift_JIS").GetByteCount(" $($_.Name) [$($_.DesktopApplicationID)]")}} | Sort-Object ByteLength -Descending)[0].ByteLength
+    $Length = ($Items | Select-Object @{Name="ByteLength";Expression={[System.Text.Encoding]::GetEncoding("Shift_JIS").GetByteCount($_.DisplayText(0))}} | Sort-Object ByteLength -Descending)[0].ByteLength
     Clear-Host
     [System.Console]::CursorVisible = $False
 
