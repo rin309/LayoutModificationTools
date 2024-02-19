@@ -17,7 +17,7 @@ Export-TaskbarPinnedAppsLayout -Path C:\Windows\OEM\TaskbarLayoutModification.xm
 順番が再現されないのは仕様です。
 
 ## 実行サンプル
-動画: https://user-images.githubusercontent.com/760251/182179704-b8a88716-6411-44ad-b0d8-2c9b06b26f54.mp4
+<div><video controls src="https://user-images.githubusercontent.com/760251/182179704-b8a88716-6411-44ad-b0d8-2c9b06b26f54.mp4" muted="false"></video></div>
 代わりに、動画のように順番がバラバラでも並び替えができるよう、編集機能を有しています。
 
 # TaskbarLayoutModification.xml を出力: 使い方2
@@ -35,7 +35,7 @@ Export-StartPinnedAppsLayout -ExportPath $env:UserProfile\Desktop\LayoutModifica
 
 ## 実行サンプル
 https://github.com/rin309/LayoutModificationTools/wiki/Export%E2%80%90StartPinnedAppsLayout-%E3%81%AE%E5%AE%9F%E8%A1%8C%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB
-動画: https://github.com/rin309/LayoutModificationTools/assets/760251/6a626f66-4dc0-400d-a3a9-2ac95bba39e8
+<div><video controls src="https://github.com/rin309/LayoutModificationTools/assets/760251/6a626f66-4dc0-400d-a3a9-2ac95bba39e8" muted="false"></video></div> 
 
 # LayoutModification.json を出力: 使い方2
 テキストエディタで編集したほうが早いかもしれませんが、並び替えの順番は自分で定義することも可能です。
