@@ -88,7 +88,7 @@ Function Export-StartPinnedAppsLayout{
     $TemporaryItems = New-Object "System.Collections.Generic.List[Item]"
     Write-Progress -Activity "スタート メニューにピン留めされたプログラムを調べています" -Status "Export-StartLayout" -PercentComplete 10
     Export-StartLayout -Path $ExportPath
-    $OriginalStartLayout = Get-Content -Path $ExportPath | ConvertFrom-Json
+    $OriginalStartLayout = Get-Content -Path $ExportPath -Encoding UTF8 | ConvertFrom-Json
     Write-Progress -Activity "スタート メニューにピン留めされたプログラムを調べています" -Status "shell:AppsFolder" -PercentComplete 30
     $PinnedItems = New-Object "System.Collections.Generic.List[Item]"
     ((New-Object -Com Shell.Application).NameSpace("shell:AppsFolder").Items()) | Select-Object Name, Path, @{Name="IsPinnedOnTaskbar";Expression={$UnpinFromStartText -in (($_.Verbs() | Select-Object Name).Name)}} | Where-Object "IsPinnedOnTaskbar" | ForEach-Object {$PinnedItems.Add((New-Object Item -Property @{Name = $_.Name; AppLinkPath = $_.Path}))}
@@ -101,7 +101,6 @@ Function Export-StartPinnedAppsLayout{
                 $TemporaryItems.Add((New-Object Item -Property @{Name = ($PinnedItems | Where-Object Name -eq $AppName).Name; AppLinkType = "desktopAppId"; AppLinkPath = ($PinnedItems | Where-Object Name -eq $AppName).AppLinkPath}))
             }
             Else{
-                write-host "Name = $(($PinnedItems | Where-Object AppLinkPath -eq $Value.($_.Name)).Name); AppLinkType = $($_.Name); AppLinkPath = $($Value.($_.Name))"
                 $TemporaryItems.Add((New-Object Item -Property @{Name = ($PinnedItems | Where-Object AppLinkPath -eq $Value.($_.Name)).Name; AppLinkType = $_.Name; AppLinkPath = $Value.($_.Name)}))
             }
         }
